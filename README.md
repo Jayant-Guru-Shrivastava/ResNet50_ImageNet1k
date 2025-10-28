@@ -8,6 +8,9 @@ Goal is to train a ResNet-50 model from scratch on the ImageNet-1k (ILSVRC 2012)
 ImageNet is one of the most significant datasets in the history of computer vision — a vast collection of over 14 million labeled images spanning 22,000 object categories, each linked to a WordNet synset (semantic category such as “dog,” “airplane,” or “apple”).
 It was originally created to advance large-scale visual recognition research and became the foundation of the ImageNet Large Scale Visual Recognition Challenge (ILSVRC), which catalyzed the modern deep learning revolution.
 
+<img width="1000" height="343" alt="image" src="https://github.com/user-attachments/assets/56c1f084-46b8-402b-b754-73495f1d651d" />
+
+
 In 2012, AlexNet demonstrated a dramatic leap in accuracy on this dataset, igniting global interest in convolutional neural networks (CNNs) and GPU-based deep learning.
 
 For this project, we use ImageNet-1k, a curated subset of ImageNet containing:
@@ -40,6 +43,9 @@ This project uses the ImageNet-1k dataset from Hugging Face Datasets:
         --output_path output/gradcam_comparison.png
 
 
+## References
+- [ImageNet: A Large-Scale Hierarchical Image Database](https://www.image-net.org/static_files/papers/imagenet_cvpr09.pdf)
+
 
 ## Collaborators
 
@@ -47,4 +53,5 @@ This project uses the ImageNet-1k dataset from Hugging Face Datasets:
 - Neelreddy Rebala (neelreddy.rebala@gmail.com)
 - Vikas (vikasjhanitk@gmail.com)
 - Divya Kamat (Divya.r.kamat@gmail.com)
+
 
