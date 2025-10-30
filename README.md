@@ -50,7 +50,6 @@ The model was trained on the ImageNet-1k (ILSVRC 2012) dataset using the followi
 - Learning rate schedule: Cosine annealing
 - Mixed Precision: Enabled using torch.cuda.amp for faster training and reduced GPU memory footprint
 - Loss Function: Cross-entropy with label smoothing (label_smoothing=0.1)
-- Seed: 5 (ensuring reproducibility)
 
 This configuration allows the model to efficiently utilize multiple GPUs on AWS for high-throughput image classification training. The use of mixed precision resulted in  faster training compared to full-precision runs, without accuracy degradation.
 
