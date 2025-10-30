@@ -77,10 +77,10 @@ Below are a few representative TensorBoard screenshots from the training process
 
 ## Missclassified Images and Gradcam
 
-    !python src/gradcam_viz.py \
+    !python /content/ResNet50_ImageNet1k/src/gradcam_viz.py \
         --num_classes 1000 \
-        --checkpoint_path /content/runs/tinyimagenet_resnet50/model_best.pth.tar \
-        --validation_img_path /content/tiny-imagenet-200/valid \
+        --checkpoint_path /content/best_model.pth \
+        --validation_img_path /content/imagenet-1k/valid \
         --num_show 20 \
         --output_path output/gradcam_comparison.png
 
