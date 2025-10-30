@@ -20,7 +20,6 @@ from timm.utils import ModelEmaV2
 from utils import JsonLogger, set_seed
 
 def build_transforms(img_size, aa, reprob):
-    # use timm recipe-style transforms
     train_tf = create_transform(
         input_size=img_size,
         is_training=True,
@@ -94,7 +93,7 @@ def main():
 
     device = "cuda" if torch.cuda.is_available() else "cpu"
 
-    # Model (timm)
+    # Model
     model = timm.create_model(args.model, pretrained=False, num_classes=1000)
     model.to(device)
     if is_distributed:
@@ -114,11 +113,10 @@ def main():
 
     dl_kw = dict(batch_size=args.batch_size, num_workers=args.workers, pin_memory=True,
                  persistent_workers=True if args.workers>0 else False)
-
     train_loader = DataLoader(train_ds, shuffle=(train_samp is None), sampler=train_samp, drop_last=True,  **dl_kw)
     val_loader   = DataLoader(val_ds,   shuffle=False,                  sampler=val_samp,   drop_last=False, **dl_kw)
 
-    # Criterion & Mixup/CutMix
+    # Criterion & Mixup/Cutmix
     mixup_fn = None
     if args.mixup > 0 or args.cutmix > 0:
         mixup_fn = Mixup(mixup_alpha=args.mixup, cutmix_alpha=args.cutmix,
@@ -127,19 +125,24 @@ def main():
     else:
         criterion = LabelSmoothingCrossEntropy(smoothing=args.label_smoothing)
 
-    # Optim & Sched
-    optimizer = optim.SGD(model.parameters(), lr=args.lr, momentum=args.momentum, weight_decay=args.weight_decay, nesterov=True)
+    # Optimizer with LR scaled by batch size
+    base_bs = 256
+    scaled_lr = args.lr * (args.batch_size / base_bs)
+    optimizer = optim.SGD(model.parameters(), lr=scaled_lr, momentum=args.momentum,
+                          weight_decay=args.weight_decay, nesterov=True)
+
+    # Cosine LR per-update (with warmup in steps)
     steps_per_epoch = len(train_loader)
-    total_steps = steps_per_epoch * args.epochs
-    warmup_steps = steps_per_epoch * args.warmup_epochs
+    total_steps  = args.epochs * steps_per_epoch
+    warmup_steps = args.warmup_epochs * steps_per_epoch
     scheduler = CosineLRScheduler(
         optimizer,
         t_initial=total_steps - warmup_steps,
-        lr_min=1e-6,
-        warmup_lr_init=args.lr * 0.01,
         warmup_t=warmup_steps,
+        warmup_lr_init=max(1e-6, scaled_lr * 0.01),
+        lr_min=1e-6,
         cycle_limit=1,
-        t_in_epochs=False,
+        t_in_epochs=False,  # per-update schedule
     )
 
     # EMA
@@ -148,6 +151,7 @@ def main():
 
     scaler = GradScaler(enabled=args.amp)
 
+    # Resume
     start_epoch = 0
     if args.resume:
         ck = torch.load(args.resume, map_location="cpu")
@@ -156,23 +160,18 @@ def main():
         else:
             model.load_state_dict(ck["model"])
         optimizer.load_state_dict(ck["optimizer"])
-        if "scheduler" in ck and ck["scheduler"] is not None:
-            scheduler.load_state_dict(ck["scheduler"])
         if "scaler" in ck and ck["scaler"] is not None and args.amp:
             scaler.load_state_dict(ck["scaler"])
         if ema and "ema" in ck and ck["ema"] is not None:
             ema.module.load_state_dict(ck["ema"])
         start_epoch = int(ck.get("epoch", 0) + 1)
-        if rank==0:
+        # place scheduler at correct global step (do not rely on saved state)
+        scheduler.step_update(start_epoch * steps_per_epoch)
+        if rank == 0:
             print(f"Resumed from {args.resume} @ epoch {start_epoch}")
 
-    # LR linear scale by batch size
-    base_bs = 256
-    for pg in optimizer.param_groups:
-        pg["lr"] = args.lr * (args.batch_size / base_bs)
-
     def train_one_epoch(epoch):
-        if is_distributed:
+        if is_distributed and train_loader.sampler is not None:
             train_loader.sampler.set_epoch(epoch)
         if rank==0:
             print(f"Epoch {epoch} training...")
@@ -185,16 +184,18 @@ def main():
                 x, y = mixup_fn(x, y)
 
             optimizer.zero_grad(set_to_none=True)
-            with torch.cuda.amp.autocast(enabled=args.amp):
-                logits = (model(x))
+            with autocast(enabled=args.amp):
+                logits = model(x)
                 loss = criterion(logits, y)
             scaler.scale(loss).backward()
             scaler.step(optimizer)
             scaler.update()
 
+            # EMA update
             if ema: ema.update(model)
 
-            scheduler.step(step + epoch * steps_per_epoch)
+            # Cosine step per update
+            scheduler.step_update(epoch * steps_per_epoch + step + 1)
 
             if mixup_fn is None:
                 acc1, acc5 = accuracy(logits, y, topk=(1,5))
@@ -215,7 +216,7 @@ def main():
         total, loss_sum, top1_sum, top5_sum = 0, 0.0, 0.0, 0.0
         for x, y in val_loader:
             x, y = x.to(device, non_blocking=True), y.to(device, non_blocking=True)
-            with torch.cuda.amp.autocast(enabled=args.amp):
+            with autocast(enabled=args.amp):
                 logits = mdl(x)
                 loss = ce(logits, y)
             acc1, acc5 = accuracy(logits, y, topk=(1,5))
@@ -256,13 +257,17 @@ def main():
             JsonLogger(args.output).write({
                 "epoch": epoch,
                 "train_loss": float(tr_loss),
+                "train_top1": float(tr_top1) if tr_top1 is not None else None,
+                "train_top5": float(tr_top5) if tr_top5 is not None else None,
                 "val_loss": float(val_loss),
                 "val_top1": float(val_top1),
                 "val_top5": float(val_top5),
                 "ema_top1": float(ema_top1) if ema_top1 is not None else None,
                 "ema_top5": float(ema_top5) if ema_top5 is not None else None,
+                "lr": float(optimizer.param_groups[0]["lr"]),
                 "time_sec": float(dt)
             })
+
 
     if is_distributed:
         dist.barrier()
