@@ -10,7 +10,7 @@ from matplotlib.patches import Rectangle
 import cv2
 import os
 
-from grad_cam import GradCAM
+from gradcam import GradCAM
 
 
 def apply_colormap_on_image(org_img, activation_map, alpha=0.5):
