@@ -41,7 +41,7 @@ This project uses the ImageNet-1k dataset from Hugging Face Datasets:
 Training was performed on an AWS EC2 GPU instance (____) equipped with ____ GPUs using PyTorch with Automatic Mixed Precision (AMP) to accelerate computation and reduce memory usage.
 The model was trained on the ImageNet-1k (ILSVRC 2012) dataset using the following configuration:
 
-<img width="1280" height="832" alt="image" src="https://github.com/user-attachments/assets/b340f4e2-0966-4d1f-aebb-9b0ba6af7043" />
+<img width="1264" height="337" alt="image" src="https://github.com/user-attachments/assets/58a77993-1792-4c15-9156-f87597c8eb46" />
 
 - Model: ResNet-50D
 - Epochs: 180
