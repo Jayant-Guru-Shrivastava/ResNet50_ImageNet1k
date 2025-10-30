@@ -36,13 +36,26 @@ This project uses the ImageNet-1k dataset from Hugging Face Datasets:
 🔗 https://huggingface.co/datasets/ILSVRC/imagenet-1k
 
 
-## Multi-GPU Training on AWS EC2
+## Training Setup and Multi-GPU Configuration
 
-Training large datasets like ImageNet is computationally intensive.
+Training was performed on an AWS EC2 GPU instance (____) equipped with ____ GPUs using PyTorch with Automatic Mixed Precision (AMP) to accelerate computation and reduce memory usage.
+The model was trained on the ImageNet-1k (ILSVRC 2012) dataset using the following configuration:
+
+<img width="1280" height="832" alt="image" src="https://github.com/user-attachments/assets/b340f4e2-0966-4d1f-aebb-9b0ba6af7043" />
+
+- Model: ResNet-50D
+- Epochs: 180
+- Batch size: 256 (automatically split across 4 GPUs → 64 per GPU)
+- Optimizer: SGD with momentum 0.9
+- Learning rate schedule: Cosine annealing
+- Mixed Precision: Enabled using torch.cuda.amp for faster training and reduced GPU memory footprint
+- Loss Function: Cross-entropy with label smoothing (label_smoothing=0.1)
+- Seed: 5 (ensuring reproducibility)
+
+This configuration allows the model to efficiently utilize multiple GPUs on AWS for high-throughput image classification training. The use of mixed precision resulted in  faster training compared to full-precision runs, without accuracy degradation.
 
 
 ## Training Logs
-
 
 
 
