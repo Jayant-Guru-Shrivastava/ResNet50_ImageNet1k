@@ -44,7 +44,7 @@ The model was trained on the ImageNet-1k (ILSVRC 2012) dataset using the followi
 <img width="1264" height="337" alt="image" src="https://github.com/user-attachments/assets/58a77993-1792-4c15-9156-f87597c8eb46" />
 
 - Model: ResNet-50D
-- Epochs: 180
+- Epochs: 113
 - Batch size: 256 (automatically split across 4 GPUs → 64 per GPU)
 - Optimizer: SGD with momentum 0.9
 - Learning rate schedule: Cosine annealing
@@ -54,7 +54,24 @@ The model was trained on the ImageNet-1k (ILSVRC 2012) dataset using the followi
 This configuration allows the model to efficiently utilize multiple GPUs on AWS for high-throughput image classification training. The use of mixed precision resulted in  faster training compared to full-precision runs, without accuracy degradation.
 
 
-## Training Logs
+## Training Metrics and TensorBoard Insights
+To monitor model convergence, learning rate scheduling, and performance trends, training and validation metrics are logged using TensorBoard.
+Below are a few representative TensorBoard screenshots from the training process:
+
+#### Top1 EMA accuracy
+<img width="1720" height="567" alt="image" src="https://github.com/user-attachments/assets/a816fcb5-9743-4f61-af4d-e561b0f37503" />
+
+#### Training and Validation Accuracy
+<img width="1719" height="587" alt="image" src="https://github.com/user-attachments/assets/c470ffb6-71b4-4a39-b4e7-50561612dd85" />
+
+#### Learning Rate
+<img width="1472" height="444" alt="image" src="https://github.com/user-attachments/assets/ab307790-ad2c-4928-9781-c145d1195eb6" />
+
+#### Training Loss
+<img width="1464" height="385" alt="image" src="https://github.com/user-attachments/assets/0e8a031b-9cd4-412f-affe-7fd5e95753f1" />
+
+#### Validation Loss
+<img width="1457" height="380" alt="image" src="https://github.com/user-attachments/assets/821bb48d-0179-4868-8410-a7d5a60a3773" />
 
 
 
