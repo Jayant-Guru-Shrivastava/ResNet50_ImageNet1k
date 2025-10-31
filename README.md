@@ -61,8 +61,7 @@ For this project, we use ImageNet-1k, a curated subset of ImageNet containing:
 This subset, known as ILSVRC 2012, has become the benchmark standard for image classification, used to evaluate architectures such as VGG, ResNet, DenseNet, and Vision Transformers (ViT).
 
 ### Dataset Source
-This project uses the ImageNet-1k dataset from Hugging Face Datasets:
-🔗 https://huggingface.co/datasets/ILSVRC/imagenet-1k
+The data set is available both on [Hugging Face](https://huggingface.co/datasets/ILSVRC/imagenet-1k) as well as Kaggle  
 
 ## Why Kaggle UI download (and not Hugging Face dataset)
 We downloaded ImageNet locally on macOS **via Kaggle’s browser UI** (after joining the ImageNet competition/license). We **did not** use certain community mirrors because of **format inconsistencies** that complicate standard PyTorch `ImageFolder` training, e.g.:
@@ -368,13 +367,8 @@ Below are a few representative TensorBoard screenshots from the training process
 #### Learning Rate
 <img width="1472" height="444" alt="image" src="https://github.com/user-attachments/assets/ab307790-ad2c-4928-9781-c145d1195eb6" />
 
-#### Training Loss
-<img width="1464" height="385" alt="image" src="https://github.com/user-attachments/assets/0e8a031b-9cd4-412f-affe-7fd5e95753f1" />
-
-#### Validation Loss
-<img width="1457" height="380" alt="image" src="https://github.com/user-attachments/assets/821bb48d-0179-4868-8410-a7d5a60a3773" />
-
-
+#### Training and Validation Loss
+<img width="840" height="401" alt="image" src="https://github.com/user-attachments/assets/71d30145-7e8b-43ef-b426-a619c6db0a6c" />
 
 ## Missclassified Images and Gradcam
 
