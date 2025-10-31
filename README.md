@@ -396,7 +396,7 @@ Users can upload an image, and the app will:
 
 ## References
 - [ImageNet: A Large-Scale Hierarchical Image Database](https://www.image-net.org/static_files/papers/imagenet_cvpr09.pdf)
-- Bag of Tricks for Image Classification with Convolutional Neural Networks (https://arxiv.org/abs/1812.01187)
+- [Bag of Tricks for Image Classification with Convolutional Neural Networks](https://arxiv.org/abs/1812.01187)
 
 ## Collaborators
 
