@@ -370,14 +370,45 @@ Below are a few representative TensorBoard screenshots from the training process
 #### Training and Validation Loss
 <img width="840" height="401" alt="image" src="https://github.com/user-attachments/assets/71d30145-7e8b-43ef-b426-a619c6db0a6c" />
 
-## Missclassified Images and Gradcam
+# 🔍 Misclassification Analysis and Grad-CAM Visualization
 
-    !python /content/ResNet50_ImageNet1k/src/gradcam_viz.py \
-        --num_classes 1000 \
-        --checkpoint_path /content/best_model.pth \
-        --validation_img_path /content/imagenet-1k/valid \
-        --num_show 20 \
-        --output_path output/gradcam_comparison.png
+To better understand where the network struggles, we conducted a **post-training error analysis** on the ImageNet-1k validation set.
+
+After achieving **EMA Top-1 ≈ 78%**, we analyzed the **misclassified images** using our custom scripts:
+- `scripts/eval_dump_miscls.py` — dumps model predictions and confidence scores for each validation image.  
+- `scripts/plot_miscls.py` — visualizes misclassified examples, with and without Grad-CAM overlays.  
+- `scripts/aggregate_errors.py` — summarizes top confusions and per-class accuracy.
+
+## ⚙️ Command used
+```bash
+python scripts/eval_dump_miscls.py   --data /mnt/imagenet-1k/ILSVRC/Data/CLS-LOC   --weights runs/r50d-imnet/best_model.pth   --model resnet50d   --batch-size 32   --workers 4   --device mps   --out runs/analysis/miscls.csv
+
+python scripts/plot_miscls.py   --csv runs/analysis/miscls.csv   --weights runs/r50d-imnet/best_model.pth   --arch resnet50d   --num 32   --device mps   --out_no_cam runs/analysis/misclassified_report_no_gradcam.png   --out_cam     runs/analysis/misclassified_report.png
+```
+
+## 🧠 What the analysis shows
+- **True vs Predicted labels** are displayed for each misclassified image, along with the model’s top-1 confidence.  
+- **Grad-CAM overlays** highlight *where* the model focused when making the wrong prediction, revealing attention biases or dataset ambiguities.  
+- Some classes (e.g., similar dog breeds or objects with overlapping shapes) remain challenging even for human annotators.  
+
+## 📊 Sample Results
+| Without Grad-CAM | With Grad-CAM |
+|------------------|---------------|
+| <img src="runs/analysis/misclassified_report_no_gradcam.png" width="1000"> | <img src="runs/analysis/misclassified_report.png" width="1000"> |
+
+> 🔴 **Red areas** = regions with highest activation;  
+> 🔵 **Blue areas** = least influential regions.  
+
+This interpretability study demonstrates how **ResNet-50D’s attention** correlates with visual features and where it occasionally fails — for example:
+- confusing **“ping-pong ball” vs “beaker”** (similar texture and context),
+- **dog breeds** with minor facial differences,
+- **tools vs utensils** with overlapping shapes.
+
+## 💡 Insights
+- High-confidence misclassifications (> 95%) often arise from **fine-grained categories**.  
+- Low-confidence misclassifications (< 30%) typically indicate **ambiguous visual cues or occlusions**.  
+- Grad-CAM maps validate that the network is largely focusing on semantically relevant regions, confirming that **training and representation learning were successful**.
+
 
 ## Model Deployment on HuggingFace
 
