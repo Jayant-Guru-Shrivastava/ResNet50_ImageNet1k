@@ -403,6 +403,9 @@ This interpretability study demonstrates how **ResNet-50D’s attention** correl
 - confusing **“ping-pong ball” vs “beaker”** (similar texture and context),
 - **dog breeds** with minor facial differences,
 - **tools vs utensils** with overlapping shapes.
+- **True: Wooden spoon → Pred: Flute** The model focuses on the elongated shape—right spatial region, wrong concept (shape bias over semantic understanding).
+- **True: Labrador retriever → Pred : Schipperk** The attention covers the dog correctly, but misclassifies due to similar silhouette
+- **True: Kite → Pred: Red-backed sandpiper** Focus is on sky or background branches, not the kite itself—demonstrating context confusion
 
 ## 💡 Insights
 - High-confidence misclassifications (> 95%) often arise from **fine-grained categories**.  
