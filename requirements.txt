@@ -6,3 +6,7 @@ pandas
 tqdm
 PyYAML
 Pillow
+boto3
+datasets
+huggingface_hub
+pyarrow
