@@ -6,3 +6,30 @@ data/
 *.pt
 *.ckpt
 .DS_Store
+
+# Credentials and sensitive files
+*.pem
+*.key
+*.env
+.env
+.env.local
+*.credentials
+credentials.json
+aws-credentials
+.aws/
+
+# State files that might contain sensitive info
+*_download_state.json
+imagenet_download_state.json
+*_state.json
+
+# Logs
+*.log
+logs/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~

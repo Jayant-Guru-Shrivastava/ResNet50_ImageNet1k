@@ -90,7 +90,7 @@ imagenet-1k/
 
 ### 1.1 Create an S3 bucket
 - Go to **AWS Console → S3 → Create bucket**.
-- Choose a unique name, e.g. `s3://jayant-imagenet-bucket` and region (e.g., `ap-south-1`).  
+- Choose a unique name, e.g. `s3://your-imagenet-bucket` and region (e.g., `ap-south-1`).  
 - **Block public access** (recommended).
 
 ### 1.2 Create an IAM **User** for your Mac (upload only)
@@ -106,13 +106,13 @@ We’ll create a limited-access user so your Mac can upload to this one bucket.
       "Sid": "ListBucket",
       "Effect": "Allow",
       "Action": ["s3:ListBucket"],
-      "Resource": "arn:aws:s3:::jayant-imagenet-bucket"
+      "Resource": "arn:aws:s3:::your-imagenet-bucket"
     },
     {
       "Sid": "PutGetObjects",
       "Effect": "Allow",
       "Action": ["s3:PutObject", "s3:GetObject", "s3:DeleteObject", "s3:ListBucketMultipartUploads", "s3:AbortMultipartUpload"],
-      "Resource": "arn:aws:s3:::jayant-imagenet-bucket/*"
+      "Resource": "arn:aws:s3:::your-imagenet-bucket/*"
     }
   ]
 }
@@ -137,7 +137,7 @@ aws configure set default.s3.multipart_chunksize 64MB
 aws configure set default.s3.max_concurrent_requests 20
 
 # Upload the dataset root
-aws s3 sync ~/Downloads/imagenet-1k s3://jayant-imagenet-bucket/imagenet-1k \
+aws s3 sync ~/Downloads/imagenet-1k s3://your-imagenet-bucket/imagenet-1k \
   --size-only --no-progress --delete
 ```
 > Tip: If you need to re-run uploads, `--size-only` helps skip identical files; `--delete` keeps the bucket mirrored to local.
@@ -169,8 +169,8 @@ aws s3 sync ~/Downloads/imagenet-1k s3://jayant-imagenet-bucket/imagenet-1k \
       "Effect": "Allow",
       "Action": ["s3:GetObject", "s3:ListBucket"],
       "Resource": [
-        "arn:aws:s3:::jayant-imagenet-bucket",
-        "arn:aws:s3:::jayant-imagenet-bucket/*"
+        "arn:aws:s3:::your-imagenet-bucket",
+        "arn:aws:s3:::your-imagenet-bucket/*"
       ]
     }
   ]
@@ -215,7 +215,7 @@ pip install timm==0.9.12 numpy pyyaml
 Fetch the dataset from S3 onto the instance (to fast local disk, e.g., `/mnt`):
 ```bash
 sudo mkdir -p /mnt/imagenet-1k && sudo chown ubuntu:ubuntu /mnt/imagenet-1k
-aws s3 sync s3://jayant-imagenet-bucket/imagenet-1k /mnt/imagenet-1k --no-progress
+aws s3 sync s3://your-imagenet-bucket/imagenet-1k /mnt/imagenet-1k --no-progress
 tree -L 3 /mnt/imagenet-1k | head -50
 ```
 
@@ -251,7 +251,7 @@ tmux new -s train
 tmux new -s sync
 # every 15 minutes, sync only logs and checkpoints
 while true; do
-  aws s3 sync ~/imagenet-r50d/runs/r50d-imnet s3://jayant-imagenet-bucket/checkpoints/r50d-imnet \
+  aws s3 sync ~/imagenet-r50d/runs/r50d-imnet s3://your-imagenet-bucket/checkpoints/r50d-imnet \
     --only-show-errors
   sleep 900
 done
